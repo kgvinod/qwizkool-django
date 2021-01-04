@@ -1,4 +1,4 @@
-<h1>{{ question.question_text }}</h1>
+<p><strong>{{ question.question_text }}</strong></p>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
@@ -8,5 +8,6 @@
     <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
     <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
 {% endfor %}
+<br /> 
 <input type="submit" value="Check Answer">
 </form>

@@ -41,7 +41,7 @@ def create_quiz(request):
     quiz_nlp = QuizNLP(wiki_article)
     print("The Quiz has maximum " + str(len(quiz_nlp.questions)) + " questions.")
 
-    new_quiz = Quiz.objects.create(title_text=quiz_nlp.article.title, description_text='TBD')
+    new_quiz = Quiz.objects.create(title_text=quiz_nlp.article.title, description_text=quiz_nlp.article.sentences[0])
     new_quiz.save()
 
     for question in quiz_nlp.questions:
@@ -52,9 +52,12 @@ def create_quiz(request):
             new_choice = Choice.objects.create(question=new_question, choice_text=choice, is_correct=(question.answer==choice))
             new_choice.save()
 
+    first_question = list(new_quiz.question_set.all())[0] 
     context = {
         'topic': topic, 
-        'information' : "The Quiz has maximum " + str(len(quiz_nlp.questions)) + " questions."
+        'description' : quiz_nlp.article.sentences[0],
+        'information' : "The Quiz has maximum " + str(len(quiz_nlp.questions)) + " questions.",
+        'question' : first_question               
         }
 
     return render(request, 'quiz/create_quiz.html', context)  
@@ -73,6 +76,12 @@ def create_quiz(request):
 
 def quiz_detail(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
+    
+    # Clear attemped flags
+    for q in quiz.question_set.all():
+        q.attempted = False
+        q.save()
+    
     first_question = list(quiz.question_set.all())[0] 
     return render(request, 'quiz/quiz_detail.html', {
         'quiz': quiz,
@@ -81,7 +90,27 @@ def quiz_detail(request, quiz_id):
 
 def quiz_results(request, quiz_id):
     quiz = get_object_or_404(Quiz, pk=quiz_id)
-    return render(request, 'quiz/quiz_results.html', {'quiz': quiz})
+    total = 0
+    attempted = 0
+    correct = 0
+    wrong = 0
+
+    for q in quiz.question_set.all():
+        total += 1
+        if q.attempted:
+            attempted += 1
+            if q.passed:
+                correct += 1
+            else:
+                wrong += 1    
+        
+    return render(request, 'quiz/quiz_results.html', {
+        'quiz': quiz,
+        'total':total,
+        'attempted':attempted,
+        'correct' : correct,
+        'wrong':wrong,
+        })
 
 def question(request, quiz_id, question_id):
     question = get_object_or_404(Question, pk=question_id)
@@ -103,20 +132,30 @@ def check_answer(request, quiz_id, question_id):
             'question': question,
             'error_message': "You didn't select a choice.",
         })
+
+    question.attempted = True    
     if selected_choice.is_correct:
         message = selected_choice.choice_text + " is the correct answer!"
+        question.passed = True
     else:    
         for choice in question.choice_set.all():
             if choice.is_correct:
                 correct_choice = choice
         
         message = selected_choice.choice_text + " is the wrong answer! Correct answer is " + correct_choice.choice_text 
-        #selected_choice.save()
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
-        #return HttpResponseRedirect(reverse('quiz:question_results', args=(question.quiz.id, question.id, selected_choice.id, )))    
+        question.passed = False
+
+    question.save()
+
+    # Get the next question
+    next_question = None
+    for q in question.quiz.question_set.all():
+        if not q.attempted:
+            next_question = q
+            break
+
     return render(request, 'quiz/question_results.html', {
         'question': question,
         'result_message': message,
+        'next_question' : next_question,
     })        

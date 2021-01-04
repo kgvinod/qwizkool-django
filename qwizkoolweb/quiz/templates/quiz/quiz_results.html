@@ -1,11 +1,11 @@
 <h1>{{ quiz.title_text }}</h1>
 
-{% comment %}
-<ul>
-{% for choice in question.choice_set.all %}
-    <li>{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
-{% endfor %}
-</ul>
-{% endcomment %}
+<h4>Total Questions -- {{ total }}</h4>
+<h4>Number attempted -- {{ attempted }}</h4>
+<h4>Number Correct -- {{ correct }}</h4>
+<h4>Number Wrong -- {{ wrong }}</h4>
 
-<a href="{% url 'quiz:quiz' quiz.id %}">Next Quiz</a>
+<form action="{% url 'quiz:index' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Go Home">
+</form>
