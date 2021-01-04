@@ -1,11 +1,21 @@
-{% if latest_question_list %}
+<p><strong>Available quizzes</strong></p>
+{% if latest_quiz_list %}
     <ul>
-    {% for question in latest_question_list %}
+    {% for quiz in latest_quiz_list %}
         {# COMMENT <li><a href="/quiz/{{ question.id }}/">{{ question.question_text }}</a></li> HARD CODED URL #}
         {# COMMENT <li><a href="{% url 'detail' question.id %}">{{ question.question_text }}</a></li> WITHOUT NAME SPACE #}
-        <li><a href="{% url 'quiz:detail' question.id %}">{{ question.question_text }}</a></li> {# COMMENT : WITH quiz namespace defined in url.py #}
+        <li><a href="{% url 'quiz:quiz_detail' quiz.id %}">{{ quiz.title_text }}</a></li> {# COMMENT : WITH quiz namespace defined in url.py #}
     {% endfor %}
     </ul>
 {% else %}
     <p>No quizzes are available.</p>
 {% endif %}
+
+<p><strong>Create new quiz</strong></p>
+<form action="{% url 'quiz:create_quiz' %}" method="post">
+    {% csrf_token %}
+    <label for="topic">Topic keywords: </label>
+    <input id="topic" type="text" name="topic" value="{{ topic_text }}">
+    <input type="submit" value="Submit">
+</form> 
+

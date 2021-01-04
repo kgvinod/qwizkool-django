@@ -1,0 +1,14 @@
+<h1>{{ question.question_text }}</h1>
+
+<ul>
+{% for choice in question.choice_set.all %}
+    <li>{{ choice.choice_text }} </li>
+{% endfor %}
+</ul>
+
+{% if result_message %}<p><strong>{{ result_message }}</strong></p>{% endif %}
+
+<form action="{% url 'quiz:question' question.quiz.id 1 %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Next Question">
+</form>
