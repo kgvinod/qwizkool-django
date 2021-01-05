@@ -1,4 +1,5 @@
 # qwizkool-django
+```
   git clone git@github.com:kgvinod/qwizkool-django.git
   cd qwizkool-django/
   git clone git@github.com:kgvinod/qwizkool-nlp.git
@@ -12,4 +13,4 @@
   python manage.py makemigrations quiz
   python manage.py migrate
   python manage.py runserver 0.0.0.0:8080
-  
+```  
