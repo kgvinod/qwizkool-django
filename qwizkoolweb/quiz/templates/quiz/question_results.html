@@ -8,10 +8,12 @@
 
 {% if result_message %}<p><strong>{{ result_message }}</strong></p>{% endif %}
 
+{% if next_question %}
 <form action="{% url 'quiz:question' question.quiz.id next_question.id %}" method="post">
     {% csrf_token %}
     <input type="submit" value="Next Question">
 </form>
+{% endif %}
 
 <form action="{% url 'quiz:quiz_results' question.quiz.id %}" method="post">
     {% csrf_token %}

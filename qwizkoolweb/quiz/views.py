@@ -125,7 +125,10 @@ def quiz_results(request, quiz_id):
 
 def question(request, quiz_id, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'quiz/question.html', {'question': question})
+    return render(request, 'quiz/question.html', {
+        'question': question, 
+        'question_number' : get_next_question_number(quiz_id)
+        })
 
 def question_results(request, quiz_id, question_id, choice_id):
     question = get_object_or_404(Question, pk=question_id)
@@ -142,6 +145,7 @@ def check_answer(request, quiz_id, question_id):
         return render(request, 'quiz/question.html', {
             'question': question,
             'error_message': "You didn't select a choice.",
+            'question_number' : get_next_question_number(quiz_id)            
         })
 
     question.attempted = True    
@@ -170,3 +174,20 @@ def check_answer(request, quiz_id, question_id):
         'result_message': message,
         'next_question' : next_question,
     })        
+
+def get_next_question_number(quiz_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    total = 0
+    attempted = 0
+    correct = 0
+    wrong = 0
+
+    for q in quiz.question_set.all():
+        total += 1
+        if q.attempted:
+            attempted += 1
+            if q.passed:
+                correct += 1
+            else:
+                wrong += 1    
+    return attempted + 1        
