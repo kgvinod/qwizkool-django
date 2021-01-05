@@ -1,0 +1,10 @@
+
+<p><strong>Created Quiz</strong></p>
+<p><strong>{{ topic }}</strong></p>
+<p><strong>{{ description }}</strong></p>
+<p><strong>{{ information }}</strong></p>
+
+<form action="{% url 'quiz:question' question.quiz.id question.id %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Start Quiz">
+    </form>

@@ -17,6 +17,7 @@ from qwizkoolnlp.nlp.QkContext import QkContext
 from qwizkoolnlp.utils.QkUtils import QkUtils
 import time
 import wikipedia
+import sys
 
 def index(request):
     latest_quiz_list = Quiz.objects.order_by('-pub_date')[:5]
@@ -31,10 +32,20 @@ def create_quiz(request):
 
     try:
         wiki_article.open()
-    except wikipedia.exceptions.PageError as err:
-        print("Page Error: {0}".format(err))
-    except wikipedia.exceptions.DisambiguationError as err:
-        print("Disambiguation Error: {0}".format(err))
+    #except wikipedia.exceptions.PageError as err:
+    #    print("Page Error: {0}".format(err))
+    #    return render(request, 'quiz/create_quiz_fail.html', context)
+    #except wikipedia.exceptions.DisambiguationError as err:
+    #    print("Disambiguation Error: {0}".format(err))
+    #    return render(request, 'quiz/create_quiz_fail.html', context)
+    except: # catch *all* exceptions
+        e_str = format(sys.exc_info()[1])
+        e_str_html = e_str.replace("\n", "<br />") 
+        context = {
+            'topic': topic, 
+            'information': e_str_html,
+        }
+        return render(request, 'quiz/create_quiz_fail.html', context)
 
     wiki_article.parse()
 
@@ -60,7 +71,7 @@ def create_quiz(request):
         'question' : first_question               
         }
 
-    return render(request, 'quiz/create_quiz.html', context)  
+    return render(request, 'quiz/create_quiz_success.html', context)  
 
 # Retained for showing example usage with HttpResponse
 # def detail(request, question_id):

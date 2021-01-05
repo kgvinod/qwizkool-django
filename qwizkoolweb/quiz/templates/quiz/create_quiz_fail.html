@@ -1,0 +1,9 @@
+
+<p><strong>Failed to create Quiz</strong></p>
+<p><strong>{{ topic }}</strong></p>
+<p><strong>{{ information|safe }}</strong></p>
+
+<form action="{% url 'quiz:index' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Go Home">
+</form>
