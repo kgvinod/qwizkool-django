@@ -1,4 +1,10 @@
-<p><strong>Available quizzes</strong></p>
+{% extends 'quiz/bootstrap.html' %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_content %}
+<div class="container">
+
+<p><h4>Available quizzes</h4></p>
 {% if latest_quiz_list %}
     <ul>
     {% for quiz in latest_quiz_list %}
@@ -11,11 +17,15 @@
     <p>No quizzes are available.</p>
 {% endif %}
 
-<p><strong>Create new quiz</strong></p>
+<p><h4>Create new quiz</h4></p>
 <form action="{% url 'quiz:create_quiz' %}" method="post">
     {% csrf_token %}
     <label for="topic">Topic keywords: </label>
     <input id="topic" type="text" name="topic" value="{{ topic_text }}">
-    <input type="submit" value="Submit">
+    {% buttons %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+    {% endbuttons %}
 </form> 
 
+</div>
+{% endblock %}

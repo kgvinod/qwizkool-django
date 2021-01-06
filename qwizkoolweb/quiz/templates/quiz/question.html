@@ -1,6 +1,12 @@
-<p><strong>{{question_number}}. {{ question.question_text }}</strong></p>
+{% extends 'quiz/bootstrap.html' %}
+{% load bootstrap4 %}
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% block bootstrap4_content %}
+<div class="container">
+
+<p><h5>{{question_number}}. {{ question.question_text }}</h5></p>
+
+{% if error_message %}<strong><p class="text-danger">{{ error_message }}</p></strong>{% endif %}
 
 <form action="{% url 'quiz:check_answer' question.quiz.id question.id %}" method="post">
 {% csrf_token %}
@@ -8,6 +14,11 @@
     <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
     <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
 {% endfor %}
-<br /> 
-<input type="submit" value="Check Answer">
+
+{% buttons %}
+    <button type="submit" class="btn btn-primary">Check Answer</button>
+{% endbuttons %}
 </form>
+
+</div>
+{% endblock %}

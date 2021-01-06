@@ -9,6 +9,7 @@ chardet==4.0.0
 cymem==2.0.5
 distlib==0.3.1
 Django==3.1.4
+django-bootstrap4==2.3.1
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz
 filelock==3.0.12
 idna==2.10

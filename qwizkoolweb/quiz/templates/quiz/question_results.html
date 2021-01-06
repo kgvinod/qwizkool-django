@@ -1,4 +1,10 @@
-<p><strong>{{ question.question_text }}</strong></p>
+{% extends 'quiz/bootstrap.html' %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_content %}
+<div class="container">
+
+<p><h5>{{ question.question_text }}</h5></p>
 
 <ul>
 {% for choice in question.choice_set.all %}
@@ -6,16 +12,28 @@
 {% endfor %}
 </ul>
 
-{% if result_message %}<p><strong>{{ result_message }}</strong></p>{% endif %}
+{% if passed %}
+    {% if result_message %}<p class="text-success"><strong>{{ result_message }}</strong></p>{% endif %}
+{% else %}
+    {% if result_message %}<p class="text-danger"><strong>{{ result_message }}</strong></p>{% endif %}
+{% endif %}
 
 {% if next_question %}
 <form action="{% url 'quiz:question' question.quiz.id next_question.id %}" method="get">
     {% csrf_token %}
-    <input type="submit" value="Next Question">
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">Next Question</button>
+    {% endbuttons %}    
+    
 </form>
 {% endif %}
 
 <form action="{% url 'quiz:quiz_results' question.quiz.id %}" method="get">
     {% csrf_token %}
-    <input type="submit" value="End Quiz">
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">End Quiz</button>
+    {% endbuttons %}    
 </form>
+
+</div>
+{% endblock %}

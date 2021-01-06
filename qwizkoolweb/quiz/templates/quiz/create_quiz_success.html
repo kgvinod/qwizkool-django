@@ -1,10 +1,21 @@
 
-<p><strong>Created Quiz</strong></p>
-<p><strong>{{ topic }}</strong></p>
-<p><strong>{{ description }}</strong></p>
-<p><strong>{{ information }}</strong></p>
+{% extends 'quiz/bootstrap.html' %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_content %}
+<div class="container">
+
+<p><h4>Created Quiz for {{ topic }}</h4></p>
+<p><h5><em>{{ description }}</em></h5></h5></p>
+<p><h5>{{ information }}</h5></p>
 
 <form action="{% url 'quiz:question' question.quiz.id question.id %}" method="get">
     {% csrf_token %}
-    <input type="submit" value="Start Quiz">
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">Start Quiz</button>
+    {% endbuttons %}      
     </form>
+
+
+</div>
+{% endblock %}    

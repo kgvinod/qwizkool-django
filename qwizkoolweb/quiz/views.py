@@ -56,7 +56,7 @@ def create_quiz(request):
     wiki_article.parse()
 
     quiz_nlp = QuizNLP(wiki_article)
-    print("The Quiz has maximum " + str(len(quiz_nlp.questions)) + " questions.")
+    print("The Quiz has " + str(len(quiz_nlp.questions)) + " questions.")
 
     new_quiz = Quiz.objects.create(title_text=quiz_nlp.article.title, description_text=quiz_nlp.article.sentences[0])
     new_quiz.save()
@@ -73,7 +73,7 @@ def create_quiz(request):
     context = {
         'topic': topic, 
         'description' : quiz_nlp.article.sentences[0],
-        'information' : "The Quiz has maximum " + str(len(quiz_nlp.questions)) + " questions.",
+        'information' : "The Quiz has " + str(len(quiz_nlp.questions)) + " questions.",
         'question' : first_question               
         }
 
@@ -224,6 +224,7 @@ def check_answer(request, quiz_id, question_id):
 
     return render(request, 'quiz/question_results.html', {
         'question': question,
+        'passed' : question.passed, 
         'result_message': message,
         'next_question' : next_question,
     })        
