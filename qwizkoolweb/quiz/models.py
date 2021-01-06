@@ -11,6 +11,22 @@ class Quiz(models.Model):
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
 
+    def get_num_attempted(self):
+        total = 0
+        attempted = 0
+        correct = 0
+        wrong = 0
+
+        for q in self.question_set.all():
+            total += 1
+            if q.attempted:
+                attempted += 1
+                if q.passed:
+                    correct += 1
+                else:
+                    wrong += 1    
+        return attempted          
+
     def __str__(self):
         return self.title_text
 

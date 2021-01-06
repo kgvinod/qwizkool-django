@@ -3,7 +3,7 @@
 <p><strong>{{ topic }}</strong></p>
 <p><strong>{{ information|safe }}</strong></p>
 
-<form action="{% url 'quiz:index' %}" method="post">
+<form action="{% url 'quiz:index' %}" method="get">
     {% csrf_token %}
     <input type="submit" value="Go Home">
 </form>

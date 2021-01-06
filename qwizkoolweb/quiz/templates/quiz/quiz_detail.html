@@ -1,7 +1,7 @@
 <h1>{{ quiz.title_text }}</h1>
 <h4>{{ quiz.description_text }}</h4>
 
-<form action="{% url 'quiz:question' quiz.id question.id %}" method="post">
+<form action="{% url 'quiz:question' quiz.id question.id %}" method="get">
 {% csrf_token %}
 <input type="submit" value="Start Quiz">
 </form>

@@ -4,7 +4,7 @@
 <p><strong>{{ description }}</strong></p>
 <p><strong>{{ information }}</strong></p>
 
-<form action="{% url 'quiz:question' question.quiz.id question.id %}" method="post">
+<form action="{% url 'quiz:question' question.quiz.id question.id %}" method="get">
     {% csrf_token %}
     <input type="submit" value="Start Quiz">
     </form>

@@ -5,7 +5,7 @@
 <h4>Number Correct -- {{ correct }}</h4>
 <h4>Number Wrong -- {{ wrong }}</h4>
 
-<form action="{% url 'quiz:index' %}" method="post">
+<form action="{% url 'quiz:index' %}" method="get">
     {% csrf_token %}
     <input type="submit" value="Go Home">
 </form>

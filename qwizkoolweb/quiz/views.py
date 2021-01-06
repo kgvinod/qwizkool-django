@@ -5,6 +5,7 @@ from django.http import Http404
 from django.template import loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.views import generic
 
 from .models import Choice, Question, Quiz
 
@@ -19,10 +20,15 @@ import time
 import wikipedia
 import sys
 
-def index(request):
-    latest_quiz_list = Quiz.objects.order_by('-pub_date')[:5]
-    context = {'latest_quiz_list': latest_quiz_list}
-    return render(request, 'quiz/index.html', context)  
+
+class IndexView(generic.ListView):
+    template_name = 'quiz/index.html'
+    context_object_name = 'latest_quiz_list'
+
+    def get_queryset(self):
+        """Return the last five published questions."""
+        return Quiz.objects.order_by('-pub_date')[:5]
+
 
 def create_quiz(request):
     topic = request.POST.get('topic')
@@ -85,59 +91,106 @@ def create_quiz(request):
 #        raise Http404("Question does not exist")
 #    return render(request, 'quiz/detail.html', {'question': question})
 
-def quiz_detail(request, quiz_id):
-    quiz = get_object_or_404(Quiz, pk=quiz_id)
-    
-    # Clear attemped flags
-    for q in quiz.question_set.all():
-        q.attempted = False
-        q.save()
-    
-    first_question = list(quiz.question_set.all())[0] 
-    return render(request, 'quiz/quiz_detail.html', {
-        'quiz': quiz,
-        'question' : first_question               
-        })
 
-def quiz_results(request, quiz_id):
-    quiz = get_object_or_404(Quiz, pk=quiz_id)
-    total = 0
-    attempted = 0
-    correct = 0
-    wrong = 0
-
-    for q in quiz.question_set.all():
-        total += 1
-        if q.attempted:
-            attempted += 1
-            if q.passed:
-                correct += 1
-            else:
-                wrong += 1    
+class QuizDetailView(generic.TemplateView):
+    template_name = 'quiz/quiz_detail.html'
+    
+    def get_context_data(self, **kwargs):
         
-    return render(request, 'quiz/quiz_results.html', {
-        'quiz': quiz,
-        'total':total,
-        'attempted':attempted,
-        'correct' : correct,
-        'wrong':wrong,
-        })
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
 
-def question(request, quiz_id, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'quiz/question.html', {
-        'question': question, 
-        'question_number' : get_next_question_number(quiz_id)
-        })
+        # Add to the template context
+        quiz_id = self.kwargs['quiz_id'] 
+        quiz = get_object_or_404(Quiz, pk=quiz_id)
 
-def question_results(request, quiz_id, question_id, choice_id):
-    question = get_object_or_404(Question, pk=question_id)
-    choice = get_object_or_404(Choice, pk=choice_id)
-    return render(request, 'quiz/question_results.html', {'question': question})
+        # Clear attemped flags
+        for q in quiz.question_set.all():
+            q.attempted = False
+            q.save()
+        
+        first_question = list(quiz.question_set.all())[0]             
+
+        context['quiz'] =  quiz
+        context['question'] = first_question
+        return context 
+
+
+class QuestionView(generic.TemplateView):
+    template_name = 'quiz/question.html'
+    
+    def get_context_data(self, **kwargs):
+        
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Add to the template context
+        quiz_id = self.kwargs['quiz_id'] 
+        question_id = self.kwargs['question_id']   
+        quiz = get_object_or_404(Quiz, pk=quiz_id)
+   
+        context['question'] =  get_object_or_404(Question, pk=question_id)
+        context['question_number'] = quiz.get_num_attempted() + 1        
+        return context  
+
+class QuizResultsView(generic.TemplateView):
+    template_name = 'quiz/quiz_results.html'
+    
+    def get_context_data(self, **kwargs):
+        
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Add to the template context
+        quiz_id = self.kwargs['quiz_id'] 
+        quiz = get_object_or_404(Quiz, pk=quiz_id)
+
+        total = 0
+        attempted = 0
+        correct = 0
+        wrong = 0
+
+        for q in quiz.question_set.all():
+            total += 1
+            if q.attempted:
+                attempted += 1
+                if q.passed:
+                    correct += 1
+                else:
+                    wrong += 1    
+            
+        context.update({
+            'quiz': quiz,
+            'total':total,
+            'attempted':attempted,
+            'correct' : correct,
+            'wrong':wrong,
+            })            
+
+        return context 
+
+class QuestionResultsView(generic.TemplateView):
+    template_name = 'quiz/question_results.html'
+    
+    def get_context_data(self, **kwargs):
+        
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+
+        # Add to the template context
+        choice_id = self.kwargs['choice_id'] 
+        question_id = self.kwargs['question_id']  
+
+        context['question'] =  get_object_or_404(Question, pk=question_id)
+        context['choice'] = get_object_or_404(Choice, pk=choice_id)        
+        return context        
+
 
 # Choice id arrives in the POST request
 def check_answer(request, quiz_id, question_id):
     question = get_object_or_404(Question, pk=question_id)
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+
     try:
         selected_choice = question.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
@@ -145,7 +198,7 @@ def check_answer(request, quiz_id, question_id):
         return render(request, 'quiz/question.html', {
             'question': question,
             'error_message': "You didn't select a choice.",
-            'question_number' : get_next_question_number(quiz_id)            
+            'question_number' : quiz.get_num_attempted() + 1
         })
 
     question.attempted = True    
@@ -174,20 +227,4 @@ def check_answer(request, quiz_id, question_id):
         'result_message': message,
         'next_question' : next_question,
     })        
-
-def get_next_question_number(quiz_id):
-    quiz = get_object_or_404(Quiz, pk=quiz_id)
-    total = 0
-    attempted = 0
-    correct = 0
-    wrong = 0
-
-    for q in quiz.question_set.all():
-        total += 1
-        if q.attempted:
-            attempted += 1
-            if q.passed:
-                correct += 1
-            else:
-                wrong += 1    
-    return attempted + 1        
+      
