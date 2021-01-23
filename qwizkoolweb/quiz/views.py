@@ -3,21 +3,16 @@ from django.shortcuts import get_object_or_404, render
 # Create your views here.
 from django.http import Http404
 from django.template import loader
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+
 from django.urls import reverse
 from django.views import generic
+from django.forms.models import model_to_dict
 
 from .models import Choice, Question, Quiz
+from .tasks import QuizCreator
 
-import qwizkoolnlp
-from qwizkoolnlp.quiz.Question import Question as QuestionNLP
-from qwizkoolnlp.article.WebArticle import WebArticle
-from qwizkoolnlp.article.WikipediaArticle import WikipediaArticle
-from qwizkoolnlp.quiz.Quiz import Quiz as QuizNLP
-from qwizkoolnlp.nlp.QkContext import QkContext
-from qwizkoolnlp.utils.QkUtils import QkUtils
 import time
-import wikipedia
 import sys
 
 
@@ -33,51 +28,26 @@ class IndexView(generic.ListView):
 def create_quiz(request):
     topic = request.POST.get('topic')
 
-    qk_ctx = QkContext('small')
-    wiki_article = WikipediaArticle(topic, qk_ctx)
+    quiz_id = QuizCreator().start(topic)
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    if quiz.status_text == 'READY':
+        first_question = list(quiz.question_set.all())[0] 
+        context = {
+            'topic': topic, 
+            'description' : quiz.description_text,
+            'information' : "The Quiz has " + str(quiz.question_count_max) + " questions.",
+            'question' : first_question               
+            }
 
-    try:
-        wiki_article.open()
-    #except wikipedia.exceptions.PageError as err:
-    #    print("Page Error: {0}".format(err))
-    #    return render(request, 'quiz/create_quiz_fail.html', context)
-    #except wikipedia.exceptions.DisambiguationError as err:
-    #    print("Disambiguation Error: {0}".format(err))
-    #    return render(request, 'quiz/create_quiz_fail.html', context)
-    except: # catch *all* exceptions
-        e_str = format(sys.exc_info()[1])
-        e_str_html = e_str.replace("\n", "<br />") 
+        return render(request, 'quiz/create_quiz_success.html', context)  
+    else:    
+        e_str_html = quiz.status_detail_text.replace("\n", "<br />") 
         context = {
             'topic': topic, 
             'information': e_str_html,
         }
-        return render(request, 'quiz/create_quiz_fail.html', context)
-
-    wiki_article.parse()
-
-    quiz_nlp = QuizNLP(wiki_article)
-    print("The Quiz has " + str(len(quiz_nlp.questions)) + " questions.")
-
-    new_quiz = Quiz.objects.create(title_text=quiz_nlp.article.title, description_text=quiz_nlp.article.sentences[0])
-    new_quiz.save()
-
-    for question in quiz_nlp.questions:
-        new_question = Question.objects.create(quiz=new_quiz, question_text=question.question_line)
-        new_question.save()
-        
-        for choice in question.choices:
-            new_choice = Choice.objects.create(question=new_question, choice_text=choice, is_correct=(question.answer==choice))
-            new_choice.save()
-
-    first_question = list(new_quiz.question_set.all())[0] 
-    context = {
-        'topic': topic, 
-        'description' : quiz_nlp.article.sentences[0],
-        'information' : "The Quiz has " + str(len(quiz_nlp.questions)) + " questions.",
-        'question' : first_question               
-        }
-
-    return render(request, 'quiz/create_quiz_success.html', context)  
+        quiz.delete()
+        return render(request, 'quiz/create_quiz_fail.html', context)    
 
 # Retained for showing example usage with HttpResponse
 # def detail(request, question_id):
@@ -184,6 +154,12 @@ class QuestionResultsView(generic.TemplateView):
         context['question'] =  get_object_or_404(Question, pk=question_id)
         context['choice'] = get_object_or_404(Choice, pk=choice_id)        
         return context        
+
+
+# Get status of quiz creation
+def get_status(request, quiz_id):
+    quiz = get_object_or_404(Quiz, pk=quiz_id)
+    return JsonResponse(model_to_dict(quiz))
 
 
 # Choice id arrives in the POST request
