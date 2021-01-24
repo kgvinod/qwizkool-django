@@ -1,0 +1,84 @@
+
+{% extends 'quiz/bootstrap.html' %}
+{% load bootstrap4 %}
+
+{% block bootstrap4_content %}
+<div class="container">
+
+<p><h4><div id="headline"></div></h4></p>
+<p><h5><em><div id="description"></div></em></h5></h5></p>
+<p>
+    <strong><span id="status"></span></strong>
+    <progress style="visibility:visible" id="progress" value="0" max="100"></progress>
+</p>
+<p><h5><div id="result"></div></h5></p>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript">
+    var progress_value = 0;
+    var status_text = '';
+
+    var itimer = setInterval(function() { 
+        var status_url = "/quiz/" + "{{ quiz_id }}" + "/get_status"
+        $.getJSON(status_url, function(jd) {
+                  $('#headline').html("Creating Quiz for " + jd.title_text);
+                  $('#status').html(jd.status_text);
+                  $('#description').html(jd.description_text);    
+
+                  if (jd.status_text != status_text ) {
+                    progress_value = 0;
+                    status_text = jd.status_text;
+                  }
+
+                  if (jd.question_count_max > 0) {
+                    $('#progress').attr("style", "visibility:visible"); 
+                    $('#progress').attr("max", jd.question_count_max); 
+                    $('#progress').attr("value", jd.question_count); 
+                  } else {
+                    $('#progress').attr("value", progress_value++);  
+                  } 
+                  
+                  if (jd.status_text == 'READY') {
+                    clearInterval(itimer);
+                    //window.location.replace('/quiz');
+                    $('#headline').html("Created Quiz for " + jd.title_text);
+                    $('#status').attr("style", "visibility:hidden");
+                    $('#description').attr("style", "visibility:visible");  
+                    $('#progress').attr("style", "display:none"); 
+                    $('#result').html("The Quiz has " + jd.question_count_max + " questions.");
+                    $('#start_button').attr("action", "/quiz/" + jd.id + "/question/" + jd.first_question_id);    
+                    $('#start_button').attr("style", "display:inline");    
+                }
+                
+                if (jd.status_text == 'FAILED') {
+                    clearInterval(itimer);
+                    //window.location.replace('/quiz');
+                    $('#headline').html("Failed to create Quiz for topic " + jd.title_text);
+                    $('#status').attr("style", "visibility:hidden");
+                    $('#result').html(jd.status_detail_text);
+                    $('#progress').attr("style", "display:none"); 
+                    $('#home_button').attr("style", "display:inline");    
+                }
+
+               });
+
+    }, 100);
+
+</script>
+
+<form id="start_button" style="display:none" action="{% url 'quiz:question' quiz_id question_id %}" method="get">
+    {% csrf_token %}
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">Start Quiz</button>
+    {% endbuttons %}      
+</form>
+
+<form id="home_button" style="display:none" action="{% url 'quiz:index' %}" method="get">
+    {% csrf_token %}
+    {% buttons %}
+    <button type="submit" class="btn btn-primary">Go Home</button>
+    {% endbuttons %}      
+</form>
+
+</div>
+{% endblock %}    

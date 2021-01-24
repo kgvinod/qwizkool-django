@@ -14,16 +14,16 @@ from .models import Choice, Question, Quiz
 
 class QuizCreator():
 
-    def start(self, topic):
+    def start(self, new_quiz):
 
-        new_quiz = Quiz.objects.create(title_text=topic)
-        new_quiz.status_text = "LOADING MODELS"
+        topic = new_quiz.title_text
+        new_quiz.status_text = "Loading Models"
         new_quiz.save()
     
         qk_ctx = QkContext('small')
         wiki_article = WikipediaArticle(topic, qk_ctx)
 
-        new_quiz.status_text = "CRAWLING WEB"
+        new_quiz.status_text = "Crawling Web"
         new_quiz.save()
 
         try:
@@ -41,11 +41,11 @@ class QuizCreator():
             new_quiz.save()
             return new_quiz.id 
 
-        new_quiz.status_text = "PARSING WEB DATA"
+        new_quiz.status_text = "Parsing Web Data"
         new_quiz.save()        
         wiki_article.parse()
 
-        new_quiz.status_text = "CREATING QUIZ"
+        new_quiz.status_text = "Creating Quiz"
         new_quiz.save() 
         quiz_nlp = QuizNLP(wiki_article)
         print("The Quiz has " + str(len(quiz_nlp.questions)) + " questions.")
@@ -54,12 +54,14 @@ class QuizCreator():
         new_quiz.question_count_max = len(quiz_nlp.questions)
         new_quiz.save()
 
-        new_quiz.status_text = "CREATING QUESTIONS"
+        new_quiz.status_text = "Creating Questions"
         new_quiz.save() 
         for question in quiz_nlp.questions:
             new_question = Question.objects.create(quiz=new_quiz, question_text=question.question_line)
             new_question.save()
             new_quiz.question_count += 1
+            if new_quiz.first_question_id == 0:
+               new_quiz.first_question_id =  new_question.id 
             new_quiz.save()
             
             for choice in question.choices:

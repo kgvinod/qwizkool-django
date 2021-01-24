@@ -14,6 +14,7 @@ from .tasks import QuizCreator
 
 import time
 import sys
+import threading
 
 
 class IndexView(generic.ListView):
@@ -26,6 +27,24 @@ class IndexView(generic.ListView):
 
 
 def create_quiz(request):
+
+    topic = request.POST.get('topic')
+    quiz = Quiz.objects.create(title_text=topic)
+
+    t = threading.Thread(target=QuizCreator().start, args=[quiz])
+    t.setDaemon(True)
+    t.start()
+
+    context = {
+        'topic': topic, 
+        'quiz_id': quiz.id,      
+        'question_id' : 1  # Will be replaced in the template code             
+        }   
+
+    return render(request, 'quiz/create_quiz_progress.html', context)  
+
+
+def create_quiz_old(request):
     topic = request.POST.get('topic')
 
     quiz_id = QuizCreator().start(topic)
@@ -34,12 +53,13 @@ def create_quiz(request):
         first_question = list(quiz.question_set.all())[0] 
         context = {
             'topic': topic, 
+            'quiz_id': quiz_id,
             'description' : quiz.description_text,
             'information' : "The Quiz has " + str(quiz.question_count_max) + " questions.",
             'question' : first_question               
             }
 
-        return render(request, 'quiz/create_quiz_success.html', context)  
+        return render(request, 'quiz/create_quiz_progress.html', context)  
     else:    
         e_str_html = quiz.status_detail_text.replace("\n", "<br />") 
         context = {

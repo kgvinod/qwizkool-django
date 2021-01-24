@@ -11,6 +11,7 @@ class Quiz(models.Model):
     status_detail_text = models.CharField(default='INITIAL', max_length=160)
     question_count = models.IntegerField(default=0)
     question_count_max = models.IntegerField(default=0)
+    first_question_id = models.IntegerField(default=0)
     
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
