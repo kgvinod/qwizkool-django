@@ -21,7 +21,7 @@
     var status_text = '';
 
     var itimer = setInterval(function() { 
-        var status_url = "/quiz/" + "{{ quiz_id }}" + "/get_status"
+        var status_url = "{% url 'quiz:get_status' quiz_id %}";
         $.getJSON(status_url, function(jd) {
                   $('#headline').html("Creating Quiz for " + jd.title_text);
                   $('#status').html(jd.status_text);
