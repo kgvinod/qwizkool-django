@@ -22,6 +22,20 @@ class IndexView(generic.ListView):
     context_object_name = 'latest_quiz_list'
 
     def get_queryset(self):
+
+        """WARNING !!!! WARNING !!!! WARNING !!!!! """
+        """ Deleting all older quizzes to keep the db small"""        
+        """ Remove for production"""                
+        quiz_list = Quiz.objects.order_by('-pub_date')[15:]
+        for quiz in quiz_list:
+            quiz.delete()
+
+        # Delete any failed entries
+        quiz_list = Quiz.objects.order_by('-pub_date')
+        for quiz in quiz_list:
+            if quiz.status_text == 'FAILED':
+                quiz.delete()
+
         """Return the last five published questions."""
         return Quiz.objects.order_by('-pub_date')[:5]
 
