@@ -38,7 +38,7 @@ def create_quiz(request):
     context = {
         'topic': topic, 
         'quiz_id': quiz.id,      
-        'question_id' : 1  # Will be replaced in the template code             
+        'first_question_id' : 1  # Will be replaced in the template code
         }   
 
     return render(request, 'quiz/create_quiz_progress.html', context)  

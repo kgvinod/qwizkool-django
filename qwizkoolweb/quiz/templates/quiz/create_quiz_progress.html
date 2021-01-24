@@ -7,9 +7,11 @@
 
 <p><h4><div id="headline"></div></h4></p>
 <p><h5><em><div id="description"></div></em></h5></h5></p>
-<p>
+<p id="status_block">
     <strong><span id="status"></span></strong>
     <progress style="visibility:visible" id="progress" value="0" max="100"></progress>
+    <strong><span id="prog_value"></span></strong>    
+    <strong><span id="prog_max"></span></strong>        
 </p>
 <p><h5><div id="result"></div></h5></p>
 
@@ -34,6 +36,8 @@
                     $('#progress').attr("style", "visibility:visible"); 
                     $('#progress').attr("max", jd.question_count_max); 
                     $('#progress').attr("value", jd.question_count); 
+                    $('#prog_max').html(jd.question_count_max); 
+                    $('#prog_value').html(jd.question_count + "/"); 
                   } else {
                     $('#progress').attr("value", progress_value++);  
                   } 
@@ -42,11 +46,17 @@
                     clearInterval(itimer);
                     //window.location.replace('/quiz');
                     $('#headline').html("Created Quiz for " + jd.title_text);
-                    $('#status').attr("style", "visibility:hidden");
+                    $('#status_block').attr("style", "visibility:hidden");
                     $('#description').attr("style", "visibility:visible");  
                     $('#progress').attr("style", "display:none"); 
                     $('#result').html("The Quiz has " + jd.question_count_max + " questions.");
-                    $('#start_button').attr("action", "/quiz/" + jd.id + "/question/" + jd.first_question_id);    
+                    
+                    var url = "{% url 'quiz:question' quiz_id first_question_id %}";
+                    //console.log(url);
+                    var new_url = url.replace("question/" + "{{ first_question_id }}", "question/" + jd.first_question_id);
+                    //console.log(new_url);
+
+                    $('#start_button').attr("action", new_url);    
                     $('#start_button').attr("style", "display:inline");    
                 }
                 
@@ -66,7 +76,7 @@
 
 </script>
 
-<form id="start_button" style="display:none" action="{% url 'quiz:question' quiz_id question_id %}" method="get">
+<form id="start_button" style="display:none" action="{% url 'quiz:question' quiz_id first_question_id %}" method="get">
     {% csrf_token %}
     {% buttons %}
     <button type="submit" class="btn btn-primary">Start Quiz</button>

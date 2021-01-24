@@ -27,7 +27,7 @@ class QuizCreator():
         new_quiz.save()
 
         try:
-            wiki_article.open()
+            new_quiz.title_text = wiki_article.open()
         #except wikipedia.exceptions.PageError as err:
         #    print("Page Error: {0}".format(err))
         #    return render(request, 'quiz/create_quiz_fail.html', context)
