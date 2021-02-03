@@ -35,3 +35,6 @@ WSGIPythonPath /home/vinod/work/deploy/qwizkool-django/qwizkoolweb/
 Make the entire project read/write using chmod -R 777 . The sqlite db needs to be writable by the www user.
 Install libapache2-mod-wsgi-py3 (if libapache2-mod-wsgi is installed, remove! This works only with python 2)
 
+Update : It does not appear that the entire project needs to be made read/write. Only the db forler and the db file itself
+chmod 777 qwizkool-django/qwizkoolweb
+chmod 777 qwizkool-django/qwizkoolweb/db.sqlite3
