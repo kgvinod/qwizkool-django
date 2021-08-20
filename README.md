@@ -38,3 +38,8 @@ Install libapache2-mod-wsgi-py3 (if libapache2-mod-wsgi is installed, remove! Th
 Update : It does not appear that the entire project needs to be made read/write. Only the db forler and the db file itself
 chmod 777 qwizkool-django/qwizkoolweb
 chmod 777 qwizkool-django/qwizkoolweb/db.sqlite3
+
+Digital Ocean Notes
+ - Spacy model pip install did not work in Digital Ocean. Instead, run the following in venv:
+    - python -m spacy download en_core_web_sm
+ - The server IP needs to be added to Adjango's LLOWED_HOSTS lists
