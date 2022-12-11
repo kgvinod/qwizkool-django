@@ -25,7 +25,7 @@ SECRET_KEY = '+ty39d*=-j&x3%&mnwyp&k^-dm@q80fm6+k8o-5tk+jkky!=6s'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.220', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['137.184.231.17', 'localhost', '127.0.0.1', 'knoeb.com']
 
 
 # Application definition

@@ -38,6 +38,7 @@ class QuizCreator():
             e_str = format(sys.exc_info()[1])
             new_quiz.status_text = "FAILED"
             new_quiz.status_detail_text = e_str
+            print('FAILED', e_str)
             new_quiz.save()
             return new_quiz.id 
 
