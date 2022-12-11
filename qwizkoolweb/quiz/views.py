@@ -18,7 +18,7 @@ import threading
 
 
 class IndexView(generic.ListView):
-    template_name = 'quiz/index.html'
+    template_name = 'index.html'
     context_object_name = 'latest_quiz_list'
 
     def get_queryset(self):
@@ -55,7 +55,7 @@ def create_quiz(request):
         'first_question_id' : 1  # Will be replaced in the template code
         }   
 
-    return render(request, 'quiz/create_quiz_progress.html', context)  
+    return render(request, 'create_quiz_progress.html', context)  
 
 
 def create_quiz_old(request):
@@ -73,7 +73,7 @@ def create_quiz_old(request):
             'question' : first_question               
             }
 
-        return render(request, 'quiz/create_quiz_progress.html', context)  
+        return render(request, 'create_quiz_progress.html', context)  
     else:    
         e_str_html = quiz.status_detail_text.replace("\n", "<br />") 
         context = {
@@ -81,7 +81,7 @@ def create_quiz_old(request):
             'information': e_str_html,
         }
         quiz.delete()
-        return render(request, 'quiz/create_quiz_fail.html', context)    
+        return render(request, 'create_quiz_fail.html', context)    
 
 # Retained for showing example usage with HttpResponse
 # def detail(request, question_id):
@@ -93,11 +93,11 @@ def create_quiz_old(request):
 #        question = Question.objects.get(pk=question_id)
 #    except Question.DoesNotExist:
 #        raise Http404("Question does not exist")
-#    return render(request, 'quiz/detail.html', {'question': question})
+#    return render(request, 'detail.html', {'question': question})
 
 
 class QuizDetailView(generic.TemplateView):
-    template_name = 'quiz/quiz_detail.html'
+    template_name = 'quiz_detail.html'
     
     def get_context_data(self, **kwargs):
         
@@ -121,7 +121,7 @@ class QuizDetailView(generic.TemplateView):
 
 
 class QuestionView(generic.TemplateView):
-    template_name = 'quiz/question.html'
+    template_name = 'question.html'
     
     def get_context_data(self, **kwargs):
         
@@ -138,7 +138,7 @@ class QuestionView(generic.TemplateView):
         return context  
 
 class QuizResultsView(generic.TemplateView):
-    template_name = 'quiz/quiz_results.html'
+    template_name = 'quiz_results.html'
     
     def get_context_data(self, **kwargs):
         
@@ -174,7 +174,7 @@ class QuizResultsView(generic.TemplateView):
         return context 
 
 class QuestionResultsView(generic.TemplateView):
-    template_name = 'quiz/question_results.html'
+    template_name = 'question_results.html'
     
     def get_context_data(self, **kwargs):
         
@@ -205,7 +205,7 @@ def check_answer(request, quiz_id, question_id):
         selected_choice = question.choice_set.get(pk=request.POST['choice'])
     except (KeyError, Choice.DoesNotExist):
         # Redisplay the question form.
-        return render(request, 'quiz/question.html', {
+        return render(request, 'question.html', {
             'question': question,
             'error_message': "You didn't select a choice.",
             'question_number' : quiz.get_num_attempted() + 1
@@ -232,7 +232,7 @@ def check_answer(request, quiz_id, question_id):
             next_question = q
             break
 
-    return render(request, 'quiz/question_results.html', {
+    return render(request, 'question_results.html', {
         'question': question,
         'passed' : question.passed, 
         'result_message': message,
