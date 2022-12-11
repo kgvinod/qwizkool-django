@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load bootstrap4 %}
+
 {% block content %}
 <style>
     body {
@@ -32,6 +34,24 @@
 </header>
 <div class="container">
     <div class="row">
+
+        <!-- Blog Create Column -->
+        <div class="col-md-8 mt-3 left">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Create New Quiz</h2>
+                    <form action="{% url 'quiz:create_quiz' %}" method="post">
+                        {% csrf_token %}
+                        <label for="topic">Topic keywords: </label>
+                        <input id="topic" type="text" name="topic" value="{{ topic_text }}">
+                        {% buttons %}
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        {% endbuttons %}
+                    </form> 
+                </div>
+            </div>
+        </div>
+
         <!-- Blog Entries Column -->
         <div class="col-md-8 mt-3 left">
             {% for quiz in latest_quiz_list %}
