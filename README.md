@@ -1,4 +1,7 @@
 # qwizkool-django
+
+Use python 3.9
+
 ```
   git clone git@github.com:kgvinod/qwizkool-django.git
   cd qwizkool-django/
