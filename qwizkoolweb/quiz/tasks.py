@@ -20,24 +20,17 @@ class QuizCreator():
         
         new_quiz = Quiz.objects.get(pk=quiz_id)
 
-        topic = new_quiz.title_text
         new_quiz.status_text = "Loading Models"
-        new_quiz.save()
-    
+        new_quiz.save(update_fields=["status_text"])
         qk_ctx = QkContext('small')
-        wiki_article = WikipediaArticle(topic, qk_ctx)
+
 
         new_quiz.status_text = "Crawling Web"
-        new_quiz.save()
+        new_quiz.save(update_fields=["status_text"])
 
+        wiki_article = WikipediaArticle(new_quiz.title_text, qk_ctx)
         try:
             new_quiz.title_text = wiki_article.open()
-        #except wikipedia.exceptions.PageError as err:
-        #    print("Page Error: {0}".format(err))
-        #    return render(request, 'quiz/create_quiz_fail.html', context)
-        #except wikipedia.exceptions.DisambiguationError as err:
-        #    print("Disambiguation Error: {0}".format(err))
-        #    return render(request, 'quiz/create_quiz_fail.html', context)
         except: # catch *all* exceptions
             e_str = format(sys.exc_info()[1])
             new_quiz.status_text = "FAILED"
@@ -47,11 +40,11 @@ class QuizCreator():
             return new_quiz.id 
 
         new_quiz.status_text = "Parsing Web Data"
-        new_quiz.save()        
+        new_quiz.save(update_fields=["status_text"])
         wiki_article.parse()
 
         new_quiz.status_text = "Creating Quiz"
-        new_quiz.save() 
+        new_quiz.save(update_fields=["status_text"])
 
         # Limit number of questions to 25
         quiz_nlp = QuizNLP(wiki_article, 25)
@@ -62,7 +55,7 @@ class QuizCreator():
         new_quiz.save()
 
         new_quiz.status_text = "Creating Questions"
-        new_quiz.save() 
+        new_quiz.save(update_fields=["status_text"])
         for question in quiz_nlp.questions:
             new_question = Question.objects.create(quiz=new_quiz, question_text=question.question_line)
             new_question.save()
@@ -77,9 +70,8 @@ class QuizCreator():
 
         new_quiz.status_text = "READY"
         new_quiz.status_detail_text = ''
-        new_quiz.save()
+        new_quiz.save(update_fields=["status_text", "status_detail_text"])
         return new_quiz.id
-
 
 
 @background(schedule=0)
@@ -87,4 +79,3 @@ def quiz_create_bg(quiz_id):
     t = threading.Thread(target=QuizCreator().start, args=[quiz_id])
     t.setDaemon(True)
     t.start()
-   
