@@ -8,7 +8,6 @@ source virtualenvwrapper.sh && workon qwizkoolweb && python /home/qwizkoolweb/wo
 ```
   git clone git@github.com:kgvinod/qwizkool-django.git
   cd qwizkool-django/
-  git clone git@github.com:kgvinod/qwizkool-nlp.git
   python3 -m venv .venv
   source .venv/bin/activate
   pip install -r requirements.txt
