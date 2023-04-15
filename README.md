@@ -1,6 +1,9 @@
 # qwizkool-django
 
 Use python 3.9
+Ubuntu 20.04
+Since django_background_task is used, need to run: 
+source virtualenvwrapper.sh && workon qwizkoolweb && python /home/qwizkoolweb/work/qwizkool-django/qwizkoolweb/manage.py  process_tasks
 
 ```
   git clone git@github.com:kgvinod/qwizkool-django.git
