@@ -8,13 +8,17 @@ from qwizkoolnlp.utils.QkUtils import QkUtils
 import time
 import wikipedia
 import sys
-
+from background_task import background
 from .models import Choice, Question, Quiz
+import threading
+
 
 
 class QuizCreator():
 
-    def start(self, new_quiz):
+    def start(self, quiz_id):
+        
+        new_quiz = Quiz.objects.get(pk=quiz_id)
 
         topic = new_quiz.title_text
         new_quiz.status_text = "Loading Models"
@@ -48,7 +52,9 @@ class QuizCreator():
 
         new_quiz.status_text = "Creating Quiz"
         new_quiz.save() 
-        quiz_nlp = QuizNLP(wiki_article)
+
+        # Limit number of questions to 25
+        quiz_nlp = QuizNLP(wiki_article, 25)
         print("The Quiz has " + str(len(quiz_nlp.questions)) + " questions.")
 
         new_quiz.description_text = quiz_nlp.article.sentences[0]
@@ -73,3 +79,12 @@ class QuizCreator():
         new_quiz.status_detail_text = ''
         new_quiz.save()
         return new_quiz.id
+
+
+
+@background(schedule=0)
+def quiz_create_bg(quiz_id):
+    t = threading.Thread(target=QuizCreator().start, args=[quiz_id])
+    t.setDaemon(True)
+    t.start()
+   

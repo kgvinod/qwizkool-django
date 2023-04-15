@@ -11,7 +11,7 @@ from django.forms.models import model_to_dict
 
 from .models import Choice, Question, Quiz
 from .tasks import QuizCreator
-
+from .tasks import quiz_create_bg
 import time
 import sys
 import threading
@@ -44,10 +44,14 @@ def create_quiz(request):
 
     topic = request.POST.get('topic')
     quiz = Quiz.objects.create(title_text=topic)
+    quiz.save()
 
-    t = threading.Thread(target=QuizCreator().start, args=[quiz])
-    t.setDaemon(True)
-    t.start()
+    #t = threading.Thread(target=QuizCreator().start, args=[quiz])
+    #t.setDaemon(True)
+    #t.start()
+    quiz_create_bg(quiz.id)
+
+
 
     context = {
         'topic': topic, 
