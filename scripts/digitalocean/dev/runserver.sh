@@ -15,6 +15,9 @@ SERVER_IP=0.0.0.0
 SERVER_PORT=8080
 
 function fresh() {
+
+  cd $HOME
+
   if [ -d "$PROJECT_DIR" ]; then
     echo "$PROJECT_DIR exists."
     cd $PROJECT_DIR
