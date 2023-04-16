@@ -1,24 +1,6 @@
 # qwizkool-django
 
-Use python 3.9
-Ubuntu 20.04
-Since django_background_task is used, need to run: 
-source virtualenvwrapper.sh && workon qwizkoolweb && python /home/qwizkoolweb/work/qwizkool-django/qwizkoolweb/manage.py  process_tasks
-
-```
-  git clone git@github.com:kgvinod/qwizkool-django.git
-  cd qwizkool-django/
-  python3 -m venv .venv
-  source .venv/bin/activate
-  pip install -r requirements.txt
-  cd qwizkool-nlp/
-  pip install .
-  cd ..
-  cd qwizkoolweb/
-  python manage.py makemigrations quiz
-  python manage.py migrate
-  python manage.py runserver 0.0.0.0:8080
-```  
+Refer scripts/digitalocean/dev/runserver.py for information on how to build and run the app on Digital Ocean droplet in development mode.
 
 Apache wsgi configuration in /atc/apache2/apache2.conf
 ```
