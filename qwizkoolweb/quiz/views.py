@@ -46,11 +46,12 @@ def create_quiz(request):
     quiz = Quiz.objects.create(title_text=topic)
     quiz.save()
 
-    #t = threading.Thread(target=QuizCreator().start, args=[quiz])
-    #t.setDaemon(True)
-    #t.start()
-    quiz_create_bg(quiz.id)
+    t = threading.Thread(target=QuizCreator().start, args=[quiz.id])
+    t.setDaemon(True)
+    t.start()
 
+    # When using with background tasks
+    #quiz_create_bg(quiz.id)
 
 
     context = {
