@@ -22,6 +22,7 @@ function fresh() {
     echo " "
     echo " "
     read -p "This will delete your project. Press any key to continue or CTRL-C to quit!"
+    rm -rf $PROJECT_DIR
   fi
 
   if [[ "$VIRTUAL_ENV" != "" ]]; then
@@ -77,4 +78,29 @@ function run() {
   python manage.py runserver $SERVER_IP:$SERVER_PORT
 }
 
-clean
+
+PS3='Please enter your choice: '
+options=("run" "build" "clean" "fresh")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "run")
+            echo "Running the server"
+	    run
+            ;;
+        "build")
+            echo "Building and running the server"
+	    build
+            ;;
+        "clean")
+            echo "Cleaning, building and running the server"
+	    clean
+            ;;
+        "fresh")
+            echo "Checking out, cleaning, building and running the server"
+	    fresh
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
