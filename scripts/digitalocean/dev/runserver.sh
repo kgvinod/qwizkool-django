@@ -13,6 +13,7 @@ GIT_USER=kgvinod
 DBFILE=$APPDIR/db.sqlite3
 SERVER_IP=0.0.0.0
 SERVER_PORT=8080
+SERVER_EXT_IP=$(ip a s eth0 | grep -E -o 'inet [0-9]{3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | cut -d' ' -f2)
 
 function fresh() {
 
@@ -80,6 +81,7 @@ function run() {
   fi
   
   cd $APPDIR
+  echo "Point your browser to http://${SERVER_EXT_IP}:${SERVER_PORT}/quiz"
   python manage.py runserver $SERVER_IP:$SERVER_PORT
 }
 
