@@ -32,7 +32,6 @@ pyparsing==2.4.7
 pytest==6.2.1
 pytz==2020.5
 requests==2.25.1
-setuptools==44.0.0
 six==1.15.0
 soupsieve==2.1
 spacy==2.3.5
@@ -45,7 +44,6 @@ tqdm==4.55.0
 urllib3==1.26.2
 virtualenv==20.2.2
 wasabi==0.8.0
-wheel==0.36.2
 wikipedia==1.4.0
 wrapt==1.12.1
 django_background_tasks==1.2.5
