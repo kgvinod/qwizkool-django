@@ -57,6 +57,8 @@ function build() {
   fi
 
   # Install libs
+  pip install wheel
+  pip install --upgrade setuptools
   cd $PROJECT_DIR
   pip install -r requirements.txt
   cd qwizkool-nlp/
