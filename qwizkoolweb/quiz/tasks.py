@@ -12,9 +12,72 @@ from background_task import background
 from .models import Choice, Question, Quiz
 import threading
 
+import openai
+import json
 
 
 class QuizCreator():
+
+    def startGPT(self, quiz_id):
+        # Set up OpenAI API
+        openai.api_key = ""
+
+        new_quiz = Quiz.objects.get(pk=quiz_id)
+
+        new_quiz.status_text = "Creating Quiz"
+        new_quiz.save(update_fields=["status_text"])
+
+        num_questions = 10
+        #prompt = f"Generate {num_questions} multiple-choice questions with 4 answer choices each."
+        prompt = f"Generate a set of {num_questions} multiple-choice questions related to {new_quiz.title_text}, and format the response as an array named 'questions' in JSON format, no markups. Each question should have a 'question_line' describing the question, and 'choices' should list each answer option 'choice' with a Boolean flag 'is_correct' indicating the correct answer. Please order the questions in increasing order of difficulty."
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        response_message = response.choices[0].message.content
+        print(response_message)
+        # Remove json markup
+        response_json = response_message.replace('```', "")
+        response_json = response_json.replace('json', "")
+
+        new_quiz.description_text = "Description to be added"
+        new_quiz.question_count_max = num_questions
+        new_quiz.save()
+
+
+        # Parse JSON response
+        data = json.loads(response_json)
+        print(data)
+
+        # Extract information for each question
+        for question in data['questions']:
+            # Extract question line and answer choices
+            question_line = question['question_line']
+            new_question = Question.objects.create(quiz=new_quiz, question_text=question_line)
+            new_question.save()
+
+            new_quiz.question_count += 1
+            if new_quiz.first_question_id == 0:
+               new_quiz.first_question_id =  new_question.id 
+            new_quiz.save()
+
+            answer_choices = question['choices']
+            
+            # Extract and print information for each answer choice
+            for answer_choice in answer_choices:
+                choice = answer_choice['choice']
+                correct = answer_choice['is_correct']
+
+                new_choice = Choice.objects.create(question=new_question, choice_text=choice, is_correct=(correct))
+                new_choice.save()                
+
+        new_quiz.status_text = "READY"
+        new_quiz.status_detail_text = ''
+        new_quiz.save(update_fields=["status_text", "status_detail_text"])
+        return new_quiz.id        
+
 
     def start(self, quiz_id):
         

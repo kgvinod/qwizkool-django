@@ -46,7 +46,7 @@ def create_quiz(request):
     quiz = Quiz.objects.create(title_text=topic)
     quiz.save()
 
-    t = threading.Thread(target=QuizCreator().start, args=[quiz.id])
+    t = threading.Thread(target=QuizCreator().startGPT, args=[quiz.id])
     t.setDaemon(True)
     t.start()
 
