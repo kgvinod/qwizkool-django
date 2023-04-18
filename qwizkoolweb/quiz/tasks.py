@@ -29,11 +29,16 @@ class QuizCreator():
 
         num_questions = 10
         #prompt = f"Generate {num_questions} multiple-choice questions with 4 answer choices each."
-        prompt = f"Generate a set of {num_questions} multiple-choice questions related to {new_quiz.title_text}, and format the response as an array named 'questions' in JSON format, no markups. Each question should have a 'question_line' describing the question, and 'choices' should list each answer option 'choice' with a Boolean flag 'is_correct' indicating the correct answer. Please order the questions in increasing order of difficulty."
+        #prompt = f"Generate {num_questions} multiple-choice questions about {new_quiz.title_text} with response in JSON formatted 'questions' array. Each question should have a 'question_line' containing the question text, a 'choices' array containing 'choice' and 'is_correct' flag."
+        #prompt = f"Generate {num_questions} multiple-choice questions about the topic {new_quiz.title_text}. The response must be JSON with a 'description' about the topic and a 'questions' array. Each question should have a 'question_line' containing the question text, a 'choices' array containing 'choice' and 'is_correct' flag."
+        prompt = f"Generate {num_questions} multiple-choice questions about the topic {new_quiz.title_text}. The response must be JSON with a correctly punctuated 'topic', a 'description' about the topic and a 'questions' array. Each question should have a 'question_line' containing the question text, a 'choices' array containing 'choice' and 'is_correct' flag."
 
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
+            messages=[
+                       #{"role": "system", "content": "You are a REST API endpoint that responds in JSON"},
+                       {"role": "user", "content": prompt}
+                     ],
         )
 
         response_message = response.choices[0].message.content
@@ -42,14 +47,14 @@ class QuizCreator():
         response_json = response_message.replace('```', "")
         response_json = response_json.replace('json', "")
 
-        new_quiz.description_text = "Description to be added"
-        new_quiz.question_count_max = num_questions
-        new_quiz.save()
-
-
         # Parse JSON response
         data = json.loads(response_json)
         print(data)
+
+        new_quiz.title_text = data['topic']
+        new_quiz.description_text = data['description']
+        new_quiz.question_count_max = num_questions
+        new_quiz.save()        
 
         # Extract information for each question
         for question in data['questions']:
